@@ -1,4 +1,13 @@
 $(document).ready(function(){
+	
+	//get page number
+	var pageNumber = 1;
+	var urlString = (window.location.href).split("#");
+	if(urlString[1]){
+		aguments = urlString[1].split("=");
+		pageNumber = aguments[1];
+	};
+	
 	//for write
 	$.get("/write",function(data){
 		$('#write').html(data);
@@ -22,9 +31,7 @@ $(document).ready(function(){
 				var frm = this;
 				$.post("/write",{ title: titleVal, content: contentVal, key: keyVal, password: passwordVal },function(data){
 					$("#message").html(data).show(1000);
-					$.get("/list",function(data){
-						$('#list').html(data);
-					});
+					goPage(1);
 					$(frm['title']).val('');
 					$(frm['password']).val('');
 					$(frm['content']).val('');
@@ -33,10 +40,16 @@ $(document).ready(function(){
 			return false;
 		});
 	});
-	$.get("/list",function(data){
-		$('#list').html(data);
-	});
+	goPage(pageNumber);
 });
+
+
+var goPage = function(pageNumber){
+	$.get('/list',{page:pageNumber},function(data){
+		$('#list').html(data);
+		window.location.replace("#page="+pageNumber);
+	});
+};
 
 //for edit 
 var edit = function(obj){
@@ -69,15 +82,13 @@ var edit = function(obj){
 			if(!hasError){
 				$.post("/edit",{ title: titleVal, content: contentVal, key: keyVal, password: passwordVal },function(data){
 					$("#message").html(data).show(1000);
-					$.get("/list",function(data){
-						$('#list').html(data);
-					});
+					goPage(1);
 				});
 			};
 			return false;
 		});
 	});
-}
+};
 
 
 var del = function(obj){
@@ -89,9 +100,7 @@ var del = function(obj){
 			$.post("/del",{ key: obj, password: passwordVal },function(data){
 				$("#message").html(data).show(1000);
 				alert(data);
-				$.get("/list",function(list){
-					$('#list').html(list);
-				});
+				goPage(pageNumber);
 			});
 			return false;
 		});
